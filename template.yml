@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  godemo-lambda
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Timeout: 5
+
+Parameters:
+  AppId:
+    Type: String
+    Default: test2
+  MongoDB:
+    Type: String
+    Default: localhost
+
+Resources:
+  godemoLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: godemoLambda
+      CodeUri: ./
+      Handler: go-rest-api
+      Runtime: go1.x
+      MemorySize: 128
+      Timeout: 15
+      Description: godemo lambda function
+      Environment:
+        Variables:
+          MONGO_URL: !Ref MongoDB
+          APP_ID: !Ref AppId
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSLambda_ReadOnlyAccess
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-062b035623f5d43af
+        SubnetIds:
+          - subnet-f8afadb0
+          - subnet-c8ceb292
+          - subnet-953a08f3
+      Events:
+        ApiEvent:
+          Type: HttpApi
+
+Outputs:
+  godemoLambdaAPI:
+    Description: "API Gateway endpoint URL for Go Function"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/default"
+  godemoLambda:
+    Description: "First Lambda Function ARN"
+    Value: !GetAtt godemoLambda.Arn
+  godemoLambdaIamRole:
+    Description: "Implicit IAM Role created for Go function"
+    Value: !GetAtt godemoLambdaRole.Arn
